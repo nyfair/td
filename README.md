@@ -1,3 +1,10 @@
+# 下载地址
+https://github.com/nyfair/td/releases/tag/latest  
+需要下载字体，对应的游戏配置，操作系统对应的版本共3个文件，把它们解压到同一目录
+
+# 演示
+https://github.com/user-attachments/assets/64d1ab88-3eb6-4a72-b131-0bef3d241574
+
 # 播放器使用说明
 
 > [!WARNING]
