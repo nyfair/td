@@ -1,0 +1,107 @@
+name: build
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: x86_64-pc-windows-msvc
+            archive: windows_x64.7z
+          - target: aarch64-pc-windows-msvc
+            archive: windows_arm64.7z
+    steps:
+    - name: Prepare
+      run: git config --global core.autocrlf false
+    - uses: actions/checkout@v6
+      with:
+        repository: ${{ secrets.REPO }}
+        token: ${{ secrets.BOT }}
+    - name: Setup UPX
+      uses: crazy-max/ghaction-upx@v4
+      with:
+        install-only: true
+        version: latest
+    - name: Compile
+      run: |
+        rustup set profile minimal
+        rustup target add --toolchain stable ${{ matrix.target }}
+        rustup update
+        cargo build --release --target=${{ matrix.target }}
+        move target\${{ matrix.target }}\release\*.exe .
+        move moe*.exe td.exe
+        upx --ultra-brute td.exe
+        7z a ${{ matrix.archive }} td.exe
+    - name: Upload
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: ${{ matrix.archive }}
+        tag: latest
+        overwrite: true
+        file_glob: true
+
+  build-linux:
+    runs-on: ubuntu-26.04
+    steps:
+    - uses: actions/checkout@v6
+      with:
+        repository: ${{ secrets.REPO }}
+        token: ${{ secrets.BOT }}
+    - name: Setup UPX
+      uses: crazy-max/ghaction-upx@v4
+      with:
+        install-only: true
+        version: latest
+    - name: Compile
+      run: |
+        sudo apt-get update && sudo apt-get --assume-yes install libwayland-dev libasound2-dev
+        rustup set profile minimal
+        rustup update
+        cargo build --release
+        mv target/release/* .
+        rm *.d
+        mv moe* td
+        upx --ultra-brute td
+        7z a linux_x64.7z td
+    - name: Upload
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: linux_x64.7z
+        tag: latest
+        overwrite: true
+        file_glob: true
+
+  build-linux-arm:
+    runs-on: ubuntu-26.04-arm
+    steps:
+    - uses: actions/checkout@v6
+      with:
+        repository: ${{ secrets.REPO }}
+        token: ${{ secrets.BOT }}
+    - name: Setup UPX
+      uses: crazy-max/ghaction-upx@v4
+    - name: Compile
+      run: |
+        sudo apt-get update && sudo apt-get --assume-yes install libwayland-dev libasound2-dev
+        rustup set profile minimal
+        rustup update
+        cargo build --release
+        mv target/release/* .
+        rm *.d
+        mv moe* td
+        upx --ultra-brute td
+        7z a linux_arm64.7z td
+    - name: Upload
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: linux_arm64.7z
+        tag: latest
+        overwrite: true
+        file_glob: true
