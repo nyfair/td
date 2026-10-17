@@ -31,7 +31,7 @@ jobs:
         rustup set profile minimal
         rustup target add --toolchain stable ${{ matrix.target }}
         rustup update
-        cargo build --release --target=${{ matrix.target }}
+        cargo build --release --no-default-features --target=${{ matrix.target }}
         move target\${{ matrix.target }}\release\*.exe .
         move moe*.exe td.exe
         upx --ultra-brute td.exe
@@ -62,7 +62,7 @@ jobs:
         sudo apt-get update && sudo apt-get --assume-yes install libwayland-dev libasound2-dev
         rustup set profile minimal
         rustup update
-        cargo build --release
+        cargo build --release --no-default-features
         mv target/release/* .
         rm *.d
         mv moe* td
@@ -91,7 +91,7 @@ jobs:
         sudo apt-get update && sudo apt-get --assume-yes install libwayland-dev libasound2-dev
         rustup set profile minimal
         rustup update
-        cargo build --release
+        cargo build --release --no-default-features
         mv target/release/* .
         rm *.d
         mv moe* td
